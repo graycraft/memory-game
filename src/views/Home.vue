@@ -131,17 +131,13 @@ export default {
     },
     startGame () {
       let startTime = Date.now()
-      let milliseconds, seconds, time
       // this.players = [...this.players.push(this.playerName)]
       this.$set(this.players, this.players.length, {
         name: this.playerName
       })
       this.dialog = false
       this.timerInterval = window.setInterval(() => {
-        time = new Date(Date.now() - startTime)
-        seconds = (time.getUTCSeconds() < 10 ? '0' : '') + time.getUTCSeconds()
-        milliseconds = String(time.getMilliseconds()).slice(0, 1)
-        this.timer = `${time.getUTCMinutes()}:${seconds}.${milliseconds}`
+        this.timer = (new Date(Date.now() - startTime)).toISOString().slice(11, -3)
       }, 100)
     },
     updateGridState (state, rowIndex, colIndex) {
