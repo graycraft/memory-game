@@ -21,7 +21,7 @@
         </v-layout>
       </v-flex>
     </v-layout>
-    <v-layout justify-center>{{ timer }}</v-layout>
+    <v-layout justify-center>{{ countdown }}</v-layout>
     <v-dialog :value="gameState === 0" max-width="240px" persistent>
       <v-card>
         <v-card-title>
@@ -45,23 +45,22 @@ export default {
   data () {
     return {
       card: {},
-      cardState: 0,
       cardTimeout: 0,
-      dialog: true,
+      cards: [
+        'alarm', 'android', 'brightness_2', 'bug_report', 'build', 'done_outline',
+        'extension', 'face', 'favorite', 'fingerprint', 'home', 'language',
+        'near_me', 'pets', 'settings', 'star', 'thumb_up', 'wb_sunny'
+      ],
+      countdown: '',
+      countdownInterval: 0,
+      countdownTimeout: 0,
       playerName: '',
       players: [],
       gameState: 0,
       grid: [],
       gridState: [],
-      icons: [
-        'alarm', 'android', 'brightness_2', 'bug_report', 'build', 'done_outline',
-        'extension', 'face', 'favorite', 'fingerprint', 'home', 'language',
-        'near_me', 'pets', 'settings', 'star', 'thumb_up', 'wb_sunny'
-      ],
       pairHit: 0,
-      timer: '',
-      timerInterval: 0,
-      timerTimeout: 0
+      pairState: 0
     }
   },
   methods: {
@@ -74,30 +73,30 @@ export default {
       this[name + 'Timeout'] = null
     },
     getIconPairs () {
-      return this.icons.concat(this.icons)
+      return this.cards.concat(this.cards)
     },
     getGridSize () {
-      return Math.round(Math.sqrt(this.icons.length * 2))
+      return Math.round(Math.sqrt(this.cards.length * 2))
     },
     getRandomIndex (pairs) {
       return Math.round(Math.random() * (pairs.length - 1))
     },
     openCard (rowIndex, colIndex) {
       if (this.gridState[rowIndex][colIndex] === 0) {
-        if (this.cardState === 0) {
+        if (this.pairState === 0) {
           this.setGridState(1, rowIndex, colIndex)
           this.cardTimeout = window.setTimeout(() => {
             this.setGridState(2, rowIndex, colIndex)
             this.clearTimeout()
-            this.cardState = 0
+            this.pairState = 0
           }, 5e3)
           this.card = {
             colIndex,
             icon: this.grid[rowIndex][colIndex],
             rowIndex
           }
-          this.cardState = 1
-        } else if (this.cardState === 1) {
+          this.pairState = 1
+        } else if (this.pairState === 1) {
           this.setGridState(1, rowIndex, colIndex)
           this.clearTimeout()
           this.cardTimeout = window.setTimeout(() => {
@@ -105,7 +104,7 @@ export default {
               this.setGridState(2, this.card.rowIndex, this.card.colIndex)
               this.setGridState(2, rowIndex, colIndex)
               this.pairHit++
-              if (this.pairHit === this.icons.length) {
+              if (this.pairHit === this.cards.length) {
                 this.clearInterval('countdown')
                 this.clearTimeout('countdown')
                 this.gameState = 2
@@ -115,10 +114,10 @@ export default {
               this.setGridState(0, rowIndex, colIndex)
             }
             this.clearTimeout()
-            this.cardState = 0
+            this.pairState = 0
             this.card = {}
           }, 5e2)
-          this.cardState = 2
+          this.pairState = 2
         }
       }
     },
@@ -153,11 +152,11 @@ export default {
         name: this.playerName
       })
       this.dialog = false
-      this.timerInterval = window.setInterval(() => {
-        this.timer = (new Date(Date.now() - startTime)).toISOString().slice(11, -3)
+      this.countdownInterval = window.setInterval(() => {
+        this.countdown = (new Date(Date.now() - startTime)).toISOString().slice(11, -3)
       }, 100)
-      this.timerTimeout = window.setTimeout(() => {
-        this.gameState = this.pairHit === this.icons.length ? 2 : 3
+      this.countdownTimeout = window.setTimeout(() => {
+        this.gameState = this.pairHit === this.cards.length ? 2 : 3
         this.clearInterval('countdown')
         this.clearTimeout('countdown')
       }, 6e4)
