@@ -22,7 +22,7 @@
       </v-flex>
     </v-layout>
     <v-layout justify-center>{{ timer }}</v-layout>
-    <v-dialog :value="dialog" max-width="240px" persistent>
+    <v-dialog :value="gameState === 0" max-width="240px" persistent>
       <v-card>
         <v-card-title>
           <span class="headline">New game</span>
@@ -50,6 +50,7 @@ export default {
       dialog: true,
       playerName: '',
       players: [],
+      gameState: 0,
       grid: [],
       gridState: [],
       icons: [
@@ -57,14 +58,20 @@ export default {
         'extension', 'face', 'favorite', 'fingerprint', 'home', 'language',
         'near_me', 'pets', 'settings', 'star', 'thumb_up', 'wb_sunny'
       ],
+      pairHit: 0,
       timer: '',
-      timerInterval: 0
+      timerInterval: 0,
+      timerTimeout: 0
     }
   },
   methods: {
-    clearTimeout () {
-      window.clearTimeout(this.cardTimeout)
-      this.cardTimeout = null
+    clearInterval (name) {
+      window.clearTimeout(this[name + 'Interval'])
+      this[name + 'Interval'] = null
+    },
+    clearTimeout (name) {
+      window.clearTimeout(this[name + 'Timeout'])
+      this[name + 'Timeout'] = null
     },
     getIconPairs () {
       return this.icons.concat(this.icons)
@@ -97,6 +104,12 @@ export default {
             if (this.card.icon === this.grid[rowIndex][colIndex]) {
               this.setGridState(2, this.card.rowIndex, this.card.colIndex)
               this.setGridState(2, rowIndex, colIndex)
+              this.pairHit++
+              if (this.pairHit === this.icons.length) {
+                this.clearInterval('countdown')
+                this.clearTimeout('countdown')
+                this.gameState = 2
+              }
             } else {
               this.setGridState(0, this.card.rowIndex, this.card.colIndex)
               this.setGridState(0, rowIndex, colIndex)
@@ -129,6 +142,10 @@ export default {
         }
       }
     },
+    setGridState (state, rowIndex, colIndex) {
+      this.gridState[rowIndex][colIndex] = state
+      this.$set(this.gridState, rowIndex, this.gridState[rowIndex])
+    },
     startGame () {
       let startTime = Date.now()
       // this.players = [...this.players.push(this.playerName)]
@@ -139,10 +156,12 @@ export default {
       this.timerInterval = window.setInterval(() => {
         this.timer = (new Date(Date.now() - startTime)).toISOString().slice(11, -3)
       }, 100)
-    },
-    setGridState (state, rowIndex, colIndex) {
-      this.gridState[rowIndex][colIndex] = state
-      this.$set(this.gridState, rowIndex, this.gridState[rowIndex])
+      this.timerTimeout = window.setTimeout(() => {
+        this.gameState = this.pairHit === this.icons.length ? 2 : 3
+        this.clearInterval('countdown')
+        this.clearTimeout('countdown')
+      }, 6e4)
+      this.gameState = 1
     }
   },
   mounted () {
