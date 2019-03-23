@@ -115,8 +115,8 @@ export default {
         if (this.pairState === 0) {
           this.setGridState(1, rowIndex, colIndex)
           this.cardTimeout = window.setTimeout(() => {
-            this.setGridState(2, rowIndex, colIndex)
-            this.clearTimeout()
+            this.setGridState(0, rowIndex, colIndex)
+            this.clearTimeout('card')
             this.pairState = 0
           }, 5e3)
           this.card = { colIndex, icon: this.grid[rowIndex][colIndex], rowIndex }
@@ -167,6 +167,7 @@ export default {
           pairs.splice(index, 1)
         }
       }
+      this.pairHit = 0
     },
     setGridState (state, rowIndex, colIndex) {
       this.gridState[rowIndex][colIndex] = state
@@ -206,5 +207,5 @@ export default {
   opacity 0
 >>> .fade-enter-active,
 >>> .fade-leave-active
-  transition opacity .5s
+  transition opacity .25s
 </style>
