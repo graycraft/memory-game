@@ -13,9 +13,9 @@
       </v-card>
       <v-flex class="pl-3 shrink">
         <v-layout :key="rowIndex" v-for="(row, rowIndex) in grid">
-          <v-sheet :class="'d-inline-block mb-3 mr-3 pa-2' + (gridState[rowIndex][colIndex] ? '' : ' transparent')" :elevation="gridState[rowIndex][colIndex] ? 2 : 0" :key="colIndex" @click="openCard(rowIndex, colIndex)" height="116" v-for="(col, colIndex) in row" width="116">
+          <v-sheet :class="'d-inline-block mb-3 mr-3 pa-2' + (gridState[rowIndex][colIndex] === 2 ? ' transparent' : '')" :elevation="gridState[rowIndex][colIndex] < 2 ? 2 : 0" :key="colIndex" @click="openCard(rowIndex, colIndex)" height="116" v-for="(col, colIndex) in row" width="116">
             <transition mode="out-in" name="fade">
-              <v-icon :key="colIndex" size="100" v-if="gridState[rowIndex][colIndex] === 1">{{ col }}</v-icon>
+              <v-icon size="100" v-if="gridState[rowIndex][colIndex] === 1">{{ col }}</v-icon>
             </transition>
           </v-sheet>
         </v-layout>
@@ -76,11 +76,11 @@ export default {
       return Math.round(Math.random() * (pairs.length - 1))
     },
     openCard (rowIndex, colIndex) {
-      if (this.gridState[rowIndex][colIndex]) {
+      if (this.gridState[rowIndex][colIndex] === 0) {
         if (this.cardState === 0) {
-          this.updateGridState(1, rowIndex, colIndex)
+          this.setGridState(1, rowIndex, colIndex)
           this.cardTimeout = window.setTimeout(() => {
-            this.updateGridState(2, rowIndex, colIndex)
+            this.setGridState(2, rowIndex, colIndex)
             this.clearTimeout()
             this.cardState = 0
           }, 5e3)
@@ -91,15 +91,15 @@ export default {
           }
           this.cardState = 1
         } else if (this.cardState === 1) {
-          this.updateGridState(1, rowIndex, colIndex)
+          this.setGridState(1, rowIndex, colIndex)
           this.clearTimeout()
           this.cardTimeout = window.setTimeout(() => {
             if (this.card.icon === this.grid[rowIndex][colIndex]) {
-              this.updateGridState(0, this.card.rowIndex, this.card.colIndex)
-              this.updateGridState(0, rowIndex, colIndex)
+              this.setGridState(2, this.card.rowIndex, this.card.colIndex)
+              this.setGridState(2, rowIndex, colIndex)
             } else {
-              this.updateGridState(2, this.card.rowIndex, this.card.colIndex)
-              this.updateGridState(2, rowIndex, colIndex)
+              this.setGridState(0, this.card.rowIndex, this.card.colIndex)
+              this.setGridState(0, rowIndex, colIndex)
             }
             this.clearTimeout()
             this.cardState = 0
@@ -124,7 +124,7 @@ export default {
           colIndex--
           index = this.getRandomIndex(pairs)
           this.grid[rowIndex][colIndex] = pairs[index]
-          this.gridState[rowIndex][colIndex] = 2
+          this.gridState[rowIndex][colIndex] = 0
           pairs.splice(index, 1)
         }
       }
@@ -140,7 +140,7 @@ export default {
         this.timer = (new Date(Date.now() - startTime)).toISOString().slice(11, -3)
       }, 100)
     },
-    updateGridState (state, rowIndex, colIndex) {
+    setGridState (state, rowIndex, colIndex) {
       this.gridState[rowIndex][colIndex] = state
       this.$set(this.gridState, rowIndex, this.gridState[rowIndex])
     }
