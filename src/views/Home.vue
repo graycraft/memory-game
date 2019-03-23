@@ -92,15 +92,11 @@ export default {
             this.clearTimeout()
             this.pairState = 0
           }, 5e3)
-          this.card = {
-            colIndex,
-            icon: this.grid[rowIndex][colIndex],
-            rowIndex
-          }
+          this.card = { colIndex, icon: this.grid[rowIndex][colIndex], rowIndex }
           this.pairState = 1
         } else if (this.pairState === 1) {
           this.setGridState(1, rowIndex, colIndex)
-          this.clearTimeout()
+          this.clearTimeout('card')
           this.cardTimeout = window.setTimeout(() => {
             if (this.card.icon === this.grid[rowIndex][colIndex]) {
               this.setGridState(2, this.card.rowIndex, this.card.colIndex)
@@ -115,7 +111,7 @@ export default {
               this.setGridState(0, this.card.rowIndex, this.card.colIndex)
               this.setGridState(0, rowIndex, colIndex)
             }
-            this.clearTimeout()
+            this.clearTimeout('card')
             this.pairState = 0
             this.card = {}
           }, 5e2)
