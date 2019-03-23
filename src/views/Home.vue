@@ -57,6 +57,8 @@ export default {
       playerName: '',
       players: [],
       gameState: 0,
+      gameTime: 6e4,
+      gameTimeLeft: 0,
       grid: [],
       gridState: [],
       pairHit: 0,
@@ -146,20 +148,18 @@ export default {
       this.$set(this.gridState, rowIndex, this.gridState[rowIndex])
     },
     startGame () {
-      let startTime = Date.now()
-      // this.players = [...this.players.push(this.playerName)]
+      let timeLeft = this.gameTimeLeft = Date.now() + this.gameTime
       this.$set(this.players, this.players.length, {
         name: this.playerName
       })
-      this.dialog = false
       this.countdownInterval = window.setInterval(() => {
-        this.countdown = (new Date(Date.now() - startTime)).toISOString().slice(11, -3)
+        this.countdown = (new Date(timeLeft - Date.now())).toISOString().slice(17, -3)
       }, 100)
       this.countdownTimeout = window.setTimeout(() => {
         this.gameState = this.pairHit === this.cards.length ? 2 : 3
         this.clearInterval('countdown')
         this.clearTimeout('countdown')
-      }, 6e4)
+      }, this.gameTime)
       this.gameState = 1
     }
   },
