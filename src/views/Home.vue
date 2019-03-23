@@ -28,11 +28,35 @@
           <span class="headline">New game</span>
         </v-card-title>
         <v-card-text>
-          <v-text-field label="Enter player name" required v-model="playerName" />
+          <v-text-field label="Enter player name" required v-model="player.name" />
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn @click="startGame" flat>Start!</v-btn>
+          <v-spacer></v-spacer>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog :value="gameState === 3" persistent max-width="240px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">You lose!</span>
+        </v-card-title>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn @click="startGame" flat>Try again</v-btn>
+          <v-spacer></v-spacer>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog :value="gameState === 2" persistent max-width="240px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">You win!</span>
+        </v-card-title>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn @click="gameState = 0" flat>Ok</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
@@ -54,15 +78,18 @@ export default {
       countdown: '',
       countdownInterval: 0,
       countdownTimeout: 0,
-      playerName: '',
-      players: [],
       gameState: 0,
       gameTime: 6e4,
       gameTimeLeft: 0,
       grid: [],
       gridState: [],
       pairHit: 0,
-      pairState: 0
+      pairState: 0,
+      player: {
+        name: 'player',
+        score: 0
+      },
+      players: []
     }
   },
   methods: {
@@ -74,11 +101,11 @@ export default {
       window.clearTimeout(this[name + 'Timeout'])
       this[name + 'Timeout'] = null
     },
-    getPairs () {
-      return this.cards.concat(this.cards)
-    },
     getGridSize () {
       return Math.round(Math.sqrt(this.cards.length * 2))
+    },
+    getPairs () {
+      return this.cards.concat(this.cards)
     },
     getRandomIndex (pairs) {
       return Math.round(Math.random() * (pairs.length - 1))
@@ -101,6 +128,8 @@ export default {
             if (this.card.icon === this.grid[rowIndex][colIndex]) {
               this.setGridState(2, this.card.rowIndex, this.card.colIndex)
               this.setGridState(2, rowIndex, colIndex)
+              this.player.score += Math.round((this.gameTimeLeft - Date.now()) / 1e3)
+              this.players.sort((item1, item2) => item2.score - item1.score)
               this.pairHit++
               if (this.pairHit === this.cards.length) {
                 this.clearInterval('countdown')
@@ -145,12 +174,16 @@ export default {
     },
     startGame () {
       let timeLeft = this.gameTimeLeft = Date.now() + this.gameTime
-      this.$set(this.players, this.players.length, {
-        name: this.playerName
-      })
+      this.initGrid()
+      if (this.players.some(player => player.name === this.player.name)) {
+        this.players[this.player.index].score = 0
+      } else {
+        this.player.index = this.players.length
+        this.$set(this.players, this.players.length, this.player)
+      }
       this.countdownInterval = window.setInterval(() => {
         this.countdown = (new Date(timeLeft - Date.now())).toISOString().slice(17, -3)
-      }, 100)
+      }, 1e2)
       this.countdownTimeout = window.setTimeout(() => {
         this.gameState = this.pairHit === this.cards.length ? 2 : 3
         this.clearInterval('countdown')
