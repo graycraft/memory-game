@@ -74,7 +74,7 @@ export default {
       window.clearTimeout(this[name + 'Timeout'])
       this[name + 'Timeout'] = null
     },
-    getIconPairs () {
+    getPairs () {
       return this.cards.concat(this.cards)
     },
     getGridSize () {
@@ -120,7 +120,7 @@ export default {
       }
     },
     initGrid () {
-      const pairs = this.getIconPairs()
+      const pairs = this.getPairs()
       let rowIndex = this.getGridSize()
       let colIndex, index
       this.grid = new Array(rowIndex)
