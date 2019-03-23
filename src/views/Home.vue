@@ -1,20 +1,20 @@
 <template>
   <v-container fluid>
     <v-layout justify-center>
-      <v-card class="mb-3" min-width="116">
+      <v-card class="mb-3 ml-3" min-width="116">
         <v-card-title class="font-weight-bold subheading">Top players</v-card-title>
-        <v-divider></v-divider>
+        <v-divider />
         <v-list dense>
           <v-list-tile :key="index" v-for="(player, index) in players">
-            <v-list-tile-content>{{ player.name }}</v-list-tile-content>
-            <v-list-tile-content class="align-end">{{ player.score }}</v-list-tile-content>
+            <v-list-tile-content v-text="player.name" />
+            <v-list-tile-content class="align-end" v-text="player.score" />
           </v-list-tile>
         </v-list>
       </v-card>
       <v-flex class="pl-3 shrink">
         <v-layout :key="rowIndex" v-for="(row, rowIndex) in grid">
-          <v-sheet :key="colIndex" @click="openCard(rowIndex, colIndex)" :class="'d-inline-block mb-3 mr-3 pa-2' + (gridState[rowIndex][colIndex] ? '' : ' transparent')" :elevation="gridState[rowIndex][colIndex] ? 2 : 0" height="116" v-for="(col, colIndex) in row" width="116">
-            <transition name="fade" mode="out-in">
+          <v-sheet :class="'d-inline-block mb-3 mr-3 pa-2' + (gridState[rowIndex][colIndex] ? '' : ' transparent')" :elevation="gridState[rowIndex][colIndex] ? 2 : 0" :key="colIndex" @click="openCard(rowIndex, colIndex)" height="116" v-for="(col, colIndex) in row" width="116">
+            <transition mode="out-in" name="fade">
               <v-icon :key="colIndex" size="100" v-if="gridState[rowIndex][colIndex] === 1">{{ col }}</v-icon>
             </transition>
           </v-sheet>
@@ -22,7 +22,7 @@
       </v-flex>
     </v-layout>
     <v-layout justify-center>{{ timer }}</v-layout>
-    <v-dialog v-model="dialog" persistent max-width="240px">
+    <v-dialog :value="dialog" max-width="240px" persistent>
       <v-card>
         <v-card-title>
           <span class="headline">New game</span>
@@ -32,7 +32,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn @click="startGame" color="blue darken-1" flat>Start!</v-btn>
+          <v-btn @click="startGame" flat>Start!</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
@@ -152,12 +152,12 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-  >>> .v-sheet
-    cursor pointer
-  >>> .fade-enter,
-  >>> .fade-leave-to
-    opacity 0
-  >>> .fade-enter-active,
-  >>> .fade-leave-active
-    transition opacity .5s
+>>> .v-sheet
+  cursor pointer
+>>> .fade-enter,
+>>> .fade-leave-to
+  opacity 0
+>>> .fade-enter-active,
+>>> .fade-leave-active
+  transition opacity .5s
 </style>
