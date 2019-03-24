@@ -5,7 +5,7 @@
         <v-card-title class="font-weight-bold subheading">Top players</v-card-title>
         <v-divider />
         <v-list dense>
-          <v-list-tile :key="index" v-for="(player, index) in players">
+          <v-list-tile :key="index" v-for="(player, index) in playersSorted">
             <v-list-tile-content v-text="player.name" />
             <v-list-tile-content class="align-end" v-text="player.score" />
           </v-list-tile>
@@ -65,7 +65,9 @@
 </template>
 
 <script>
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 export default {
+  computed: { ...mapGetters(['playersSorted']) },
   data () {
     return {
       card: {},
@@ -86,13 +88,15 @@ export default {
       pairHit: 0,
       pairState: 0,
       player: {
+        index: 0,
         name: 'player',
         score: 0
-      },
-      players: []
+      }
     }
   },
   methods: {
+    ...mapActions(['putPlayer']),
+    ...mapMutations(['updatePlayer']),
     clearInterval (name) {
       window.clearTimeout(this[name + 'Interval'])
       this[name + 'Interval'] = null
@@ -129,7 +133,7 @@ export default {
               this.setGridState(2, this.card.rowIndex, this.card.colIndex)
               this.setGridState(2, rowIndex, colIndex)
               this.player.score += Math.round((this.gameTimeLeft - Date.now()) / 1e3)
-              this.players.sort((item1, item2) => item2.score - item1.score)
+              this.updatePlayer(this.player)
               this.pairHit++
               if (this.pairHit === this.cards.length) {
                 this.clearInterval('countdown')
@@ -175,13 +179,9 @@ export default {
     },
     startGame () {
       let timeLeft = this.gameTimeLeft = Date.now() + this.gameTime
+      this.putPlayer({ name: this.player.name, score: 0 })
+        .then(player => { this.player = player })
       this.initGrid()
-      if (this.players.some(player => player.name === this.player.name)) {
-        this.players[this.player.index].score = 0
-      } else {
-        this.player.index = this.players.length
-        this.$set(this.players, this.players.length, this.player)
-      }
       this.countdownInterval = window.setInterval(() => {
         this.countdown = (new Date(timeLeft - Date.now())).toISOString().slice(17, -3)
       }, 1e2)
