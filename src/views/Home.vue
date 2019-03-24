@@ -98,7 +98,7 @@ export default {
     ...mapActions(['putPlayer']),
     ...mapMutations(['updatePlayer']),
     clearInterval (name) {
-      window.clearTimeout(this[name + 'Interval'])
+      window.clearInterval(this[name + 'Interval'])
       this[name + 'Interval'] = null
     },
     clearTimeout (name) {
