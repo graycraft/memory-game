@@ -70,24 +70,24 @@ export default {
   computed: { ...mapGetters(['playersSorted']) },
   data () {
     return {
-      card: {},
-      cardTimeout: 0,
-      cards: [
+      card: {}, // First pair's card position and icon
+      cardTimeout: 0, // First pair's card timeout id
+      cards: [ // Cards available
         'alarm', 'android', 'brightness_2', 'bug_report', 'build', 'done_outline',
         'extension', 'face', 'favorite', 'fingerprint', 'home', 'language',
         'near_me', 'pets', 'settings', 'star', 'thumb_up', 'wb_sunny'
       ],
-      countdown: '',
-      countdownInterval: 0,
-      countdownTimeout: 0,
-      gameState: 0,
-      gameTime: 6e4,
-      gameTimestamp: 0,
-      grid: [],
-      gridState: [],
-      pairHit: 0,
-      pairState: 0,
-      player: {
+      countdown: '', // String representation of game time left with fraction of a second
+      countdownInterval: 0, // Interval id of countdown
+      countdownTimeout: 0, // Timeout id of countdown
+      gameState: 0, // 0 - ended; 1 - begun; 2 - won; 3 - losed
+      gameTime: 6e4, // Game time in seconds
+      gameTimestamp: 0, // Unix timestamp indicating when game ends
+      grid: [], // Paired cards position on grid
+      gridState: [], // 0 - closed; 1 - opened; 2 - pair hit
+      pairHit: 0, // Total number of pairs hit
+      pairState: 0, // 0 - hidden; 1 - one card opened; 2 - both cards opened
+      player: { // Current player
         index: 0,
         name: 'player',
         score: 0
