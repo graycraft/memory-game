@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <title>memory-game</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons">
+    <link href="//fonts.gstatic.com" rel="preconnect">
+    <link as="style" crossorigin href="//fonts.googleapis.com/css?family=Material+Icons|Roboto:300,400,500,700" rel="preload">
+    <link crossorigin href="//fonts.googleapis.com/css?family=Material+Icons|Roboto:300,400,500,700" rel="stylesheet">
   </head>
   <body>
     <noscript>
@@ -15,5 +16,9 @@
     </noscript>
     <div id="app"></div>
     <!-- built files will be auto injected -->
+    <style>
+      @font-feature-values Material Icons { font-display: swap; }
+      @font-feature-values Roboto { font-display: fallback; }
+    </style>
   </body>
 </html>
