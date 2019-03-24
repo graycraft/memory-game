@@ -5,7 +5,7 @@
         <v-card-title class="font-weight-bold subheading">Top players</v-card-title>
         <v-divider />
         <v-list dense>
-          <v-list-tile :key="index" v-for="(player, index) in players">
+          <v-list-tile :key="index" v-for="(player, index) in playersSorted">
             <v-list-tile-content v-text="player.name" />
             <v-list-tile-content class="align-end" v-text="player.score" />
           </v-list-tile>
@@ -65,36 +65,40 @@
 </template>
 
 <script>
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 export default {
+  computed: { ...mapGetters(['playersSorted']) },
   data () {
     return {
-      card: {},
-      cardTimeout: 0,
-      cards: [
+      card: {}, // First pair's card position and icon
+      cardTimeout: 0, // First pair's card timeout id
+      cards: [ // Cards available
         'alarm', 'android', 'brightness_2', 'bug_report', 'build', 'done_outline',
         'extension', 'face', 'favorite', 'fingerprint', 'home', 'language',
         'near_me', 'pets', 'settings', 'star', 'thumb_up', 'wb_sunny'
       ],
-      countdown: '',
-      countdownInterval: 0,
-      countdownTimeout: 0,
-      gameState: 0,
-      gameTime: 6e4,
-      gameTimeLeft: 0,
-      grid: [],
-      gridState: [],
-      pairHit: 0,
-      pairState: 0,
-      player: {
+      countdown: '', // String representation of game time left with fraction of a second
+      countdownInterval: 0, // Interval id of countdown
+      countdownTimeout: 0, // Timeout id of countdown
+      gameState: 0, // 0 - ended; 1 - begun; 2 - won; 3 - losed
+      gameTime: 6e4, // Game time in seconds
+      gameTimestamp: 0, // Unix timestamp indicating when game ends
+      grid: [], // Paired cards position on grid
+      gridState: [], // 0 - closed; 1 - opened; 2 - pair hit
+      pairHit: 0, // Total number of pairs hit
+      pairState: 0, // 0 - hidden; 1 - one card opened; 2 - both cards opened
+      player: { // Current player
+        index: 0,
         name: 'player',
         score: 0
-      },
-      players: []
+      }
     }
   },
   methods: {
+    ...mapActions(['putPlayer']),
+    ...mapMutations(['updatePlayer']),
     clearInterval (name) {
-      window.clearTimeout(this[name + 'Interval'])
+      window.clearInterval(this[name + 'Interval'])
       this[name + 'Interval'] = null
     },
     clearTimeout (name) {
@@ -128,8 +132,8 @@ export default {
             if (this.card.icon === this.grid[rowIndex][colIndex]) {
               this.setGridState(2, this.card.rowIndex, this.card.colIndex)
               this.setGridState(2, rowIndex, colIndex)
-              this.player.score += Math.round((this.gameTimeLeft - Date.now()) / 1e3)
-              this.players.sort((item1, item2) => item2.score - item1.score)
+              this.setScore()
+              this.updatePlayer(this.player)
               this.pairHit++
               if (this.pairHit === this.cards.length) {
                 this.clearInterval('countdown')
@@ -173,17 +177,16 @@ export default {
       this.gridState[rowIndex][colIndex] = state
       this.$set(this.gridState, rowIndex, this.gridState[rowIndex])
     },
+    setScore () {
+      this.player.score += Math.round((this.gameTimestamp - Date.now()) / 1e3)
+    },
     startGame () {
-      let timeLeft = this.gameTimeLeft = Date.now() + this.gameTime
+      const timestamp = this.gameTimestamp = Date.now() + this.gameTime
+      this.putPlayer({ name: this.player.name, score: 0 })
+        .then(player => { this.player = player })
       this.initGrid()
-      if (this.players.some(player => player.name === this.player.name)) {
-        this.players[this.player.index].score = 0
-      } else {
-        this.player.index = this.players.length
-        this.$set(this.players, this.players.length, this.player)
-      }
       this.countdownInterval = window.setInterval(() => {
-        this.countdown = (new Date(timeLeft - Date.now())).toISOString().slice(17, -3)
+        this.countdown = (new Date(timestamp - Date.now())).toISOString().slice(17, -3)
       }, 1e2)
       this.countdownTimeout = window.setTimeout(() => {
         this.gameState = this.pairHit === this.cards.length ? 2 : 3
