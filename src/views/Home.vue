@@ -82,7 +82,7 @@ export default {
       countdownTimeout: 0,
       gameState: 0,
       gameTime: 6e4,
-      gameTimeLeft: 0,
+      gameTimestamp: 0,
       grid: [],
       gridState: [],
       pairHit: 0,
@@ -132,7 +132,7 @@ export default {
             if (this.card.icon === this.grid[rowIndex][colIndex]) {
               this.setGridState(2, this.card.rowIndex, this.card.colIndex)
               this.setGridState(2, rowIndex, colIndex)
-              this.player.score += Math.round((this.gameTimeLeft - Date.now()) / 1e3)
+              this.player.score += Math.round((this.gameTimestamp - Date.now()) / 1e3)
               this.updatePlayer(this.player)
               this.pairHit++
               if (this.pairHit === this.cards.length) {
@@ -178,12 +178,12 @@ export default {
       this.$set(this.gridState, rowIndex, this.gridState[rowIndex])
     },
     startGame () {
-      let timeLeft = this.gameTimeLeft = Date.now() + this.gameTime
+      const timestamp = this.gameTimestamp = Date.now() + this.gameTime
       this.putPlayer({ name: this.player.name, score: 0 })
         .then(player => { this.player = player })
       this.initGrid()
       this.countdownInterval = window.setInterval(() => {
-        this.countdown = (new Date(timeLeft - Date.now())).toISOString().slice(17, -3)
+        this.countdown = (new Date(timestamp - Date.now())).toISOString().slice(17, -3)
       }, 1e2)
       this.countdownTimeout = window.setTimeout(() => {
         this.gameState = this.pairHit === this.cards.length ? 2 : 3
