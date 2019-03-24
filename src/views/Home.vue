@@ -132,7 +132,7 @@ export default {
             if (this.card.icon === this.grid[rowIndex][colIndex]) {
               this.setGridState(2, this.card.rowIndex, this.card.colIndex)
               this.setGridState(2, rowIndex, colIndex)
-              this.player.score += Math.round((this.gameTimestamp - Date.now()) / 1e3)
+              this.setScore()
               this.updatePlayer(this.player)
               this.pairHit++
               if (this.pairHit === this.cards.length) {
@@ -176,6 +176,9 @@ export default {
     setGridState (state, rowIndex, colIndex) {
       this.gridState[rowIndex][colIndex] = state
       this.$set(this.gridState, rowIndex, this.gridState[rowIndex])
+    },
+    setScore () {
+      this.player.score += Math.round((this.gameTimestamp - Date.now()) / 1e3)
     },
     startGame () {
       const timestamp = this.gameTimestamp = Date.now() + this.gameTime
