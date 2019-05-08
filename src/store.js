@@ -11,12 +11,9 @@ export default new Vuex.Store({
         commit('updatePlayer', { ...player, index })
       } else {
         commit('createPlayer', player)
-        index = state.players.length - 1
+        index += state.players.length
       }
-      return {
-        ...player,
-        index
-      }
+      return { ...player, index }
     }
   },
   getters: {
